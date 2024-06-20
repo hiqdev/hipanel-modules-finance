@@ -10,6 +10,7 @@
 
 namespace hipanel\modules\finance\grid;
 
+use hipanel\grid\RefColumn;
 use hipanel\modules\client\grid\ClientColumn;
 use hipanel\modules\finance\models\FakeGroupingSale;
 use hipanel\modules\finance\models\FakeSale;
@@ -98,8 +99,10 @@ class SaleGridView extends \hipanel\grid\BoxedGridView
                     : false,
             ],
             'object' => [
+                'class' => RefColumn::class,
                 'format' => 'raw',
                 'filterAttribute' => 'object_inilike',
+                'i18nDictionary' => 'hipanel:finance:sale',
                 'value' => function (Sale $model) {
                     if ($model instanceof FakeSale) {
                         return Html::encode($model->object);
