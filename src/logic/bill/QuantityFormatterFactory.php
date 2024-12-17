@@ -64,7 +64,11 @@ final class QuantityFormatterFactory implements QuantityFormatterFactoryInterfac
         'overuse,snapshot_du' => [FractionQuantityFormatter::class, FractionUnit::SIZE],
     ];
 
-    public function __construct(private readonly IntlFormatter $intlFormatter, private readonly BillTypesProvider $billTypesProvider)
+    public function __construct(
+        private readonly IntlFormatter $intlFormatter,
+        private readonly BillTypesProvider $billTypesProvider,
+        private readonly BillingRegistryInterface $BillingRegistry,
+    )
     {
     }
 
