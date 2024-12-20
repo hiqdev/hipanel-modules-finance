@@ -21,7 +21,7 @@ final class ConsumptionConfigurator
         return $this->getConfigurationByClass($class)['columns'];
     }
 
-    public function getGroups(string $class): array
+    private function getGroups(string $class): array
     {
         $groups = [];
         $columns = $this->getColumns($class);
@@ -97,7 +97,7 @@ final class ConsumptionConfigurator
         return $result;
     }
 
-    public function getDecorator(string $class, string $type): ResourceDecoratorInterface
+    private function getDecorator(string $class, string $type): ResourceDecoratorInterface
     {
         $config = $this->getConfigurationByClass($class);
         $config['resourceModel']->type = $type;
@@ -144,8 +144,8 @@ final class ConsumptionConfigurator
             'label' => ['hipanel:finance', $class],
             'columns' => [],
             'groups' => [],
-            'model' => Target::class,
-            'resourceModel' => TargetResource::class,
+            'model' => $this->createObject(Target::class),
+            'resourceModel' => $this->createObject(TargetResource::class),
         ];
 
         return $this->getConfigurations()[$class] ?? $fallback;
@@ -156,8 +156,8 @@ final class ConsumptionConfigurator
         return array_map(function (array $config): array {
             [$dictionary, $label] = $config['label'];
             $config['label'] = Yii::t($dictionary, $label);
-            $config['model'] = $this->createObject($config['model']);
-            $config['resourceModel'] = $this->createObject($config['resourceModel']);
+            $config['model'] = $this->createObject(Target::class);
+            $config['resourceModel'] = $this->createObject(TargetResource::class);
 
             return $config;
         }, $this->configurations);
