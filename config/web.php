@@ -141,73 +141,12 @@ return [
             \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => [
                 'class' => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
                 'configurations' => [
-                    'anycastcdn' => [
-                        'label' => ['hipanel:finance', 'Anycast CDN'],
-                        'columns' => [
-                            'cdn_traf_plain',
-                            'cdn_traf_ssl',
-                            'cdn_traf',
-                            'cdn_traf_max',
-                            'cdn_traf95',
-                            'cdn_traf95_max',
-                            'cdn_cache',
-                            'cdn_cache95',
-                        ],
-                        'groups' => [],
-                    ],
-                    'videocdn' => [
-                        'label' => ['hipanel:finance', 'VideoCDN'],
-                        'columns' => [
-                            'server_traf',
-                            'server_traf_in',
-                            'server_traf95',
-                            'server_traf95_in',
-                            'server_du',
-                            'server_files',
-                            'server_ssd',
-                            'server_sata',
-                        ],
-                        'groups' => [['server_traf', 'server_traf_in'], ['server_traf95', 'server_traf95_in']],
-                    ],
-                    'vps' => [
-                        'label' => ['hipanel:finance', 'VPS'],
-                        'columns' => ['vps_traf', 'vps_traf_in', 'vps_traf_max', 'cloud_ip_anycast', 'cloud_ip_public'],
-                        'groups' => [['vps_traf', 'vps_traf_in', 'cloud_ip_anycast', 'cloud_ip_public']],
-                    ],
-                    'snapshot' => [
-                        'label' => ['hipanel:finance', 'Snapshot'],
-                        'columns' => ['snapshot_du'],
-                        'groups' => [],
-                    ],
-                    'volume' => [
-                        'label' => ['hipanel:finance', 'Volume'],
-                        'columns' => ['volume_du'],
-                        'groups' => [],
-                    ],
-                    'storage' => [
-                        'label' => ['hipanel:finance', 'Storage'],
-                        'columns' => ['storage_du', 'storage_du95'],
-                        'groups' => [],
-                    ],
-                    'private_cloud' => [
-                        'label' => ['hipanel:finance', 'Private cloud'],
-                        'columns' => [],
-                        'groups' => [],
-                    ],
-                    'private_cloud_backup' => [
-                        'label' => ['hipanel:finance', 'Private cloud backup'],
-                        'columns' => ['private_cloud_backup_du'],
-                        'groups' => [],
-                    ],
-                    'load_balancer' => [
-                        'label' => ['hipanel:finance', 'Load balancer'],
-                        'columns' => ['lb_capacity_unit', 'lb_ha_capacity_unit'],
-                        'groups' => [],
-                    ],
                     'tariff' => [
                         'label' => ['hipanel:finance', 'Tariff resources'],
                         'columns' => ['server_traf95_max', 'server_traf95', 'server_traf95_in'],
                         'groups' => [],
+                        'model' => Target::class,
+                        'resourceModel' => TargetResource::class,
                     ],
                 ]
             ],
