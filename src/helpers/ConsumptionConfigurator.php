@@ -9,12 +9,18 @@ use hipanel\modules\finance\models\Consumption;
 use hipanel\modules\finance\models\decorators\ResourceDecoratorInterface;
 use hipanel\modules\finance\models\Target;
 use hipanel\modules\finance\models\TargetResource;
+use hiqdev\billing\registry\behavior\ConsumptionConfigurationBehaviour;
+use hiqdev\php\billing\product\BillingRegistry;
 use yii\db\ActiveRecordInterface;
 use Yii;
 
 final class ConsumptionConfigurator
 {
     public array $configurations = [];
+
+    public function __construct(private readonly BillingRegistry $billingRegistry)
+    {
+    }
 
     public function getColumns(string $class): array
     {
@@ -138,7 +144,7 @@ final class ConsumptionConfigurator
      * @param string $class
      * @return array{label: string, columns: array, group: array, model: ActiveRecordInterface, resourceModel: ActiveRecordInterface}
      */
-    private function getConfigurationByClass(string $class): array
+    public function getConfigurationByClass(string $class): array
     {
         $fallback = [
             'label' => ['hipanel:finance', $class],
@@ -153,14 +159,21 @@ final class ConsumptionConfigurator
 
     public function getConfigurations(): array
     {
-        return array_map(function (array $config): array {
-            [$dictionary, $label] = $config['label'];
-            $config['label'] = Yii::t($dictionary, $label);
-            $config['model'] = $this->createObject(Target::class);
-            $config['resourceModel'] = $this->createObject(TargetResource::class);
+        $configurations = [];
+        /** @var ConsumptionConfigurationBehaviour $behavior */
+        foreach ($this->billingRegistry->getBehaviors(ConsumptionConfigurationBehaviour::class) as $behavior) {
+            $tariffType = $behavior->getTariffType();
 
-            return $config;
-        }, $this->configurations);
+            $configurations[$tariffType->name()] = [
+                'label' => $behavior->getLabel(),
+                'columns' => $behavior->columns,
+                'groups' => $behavior->groups,
+                'model' => $this->createObject($behavior->getModel() ?? Target::class),
+                'resourceModel' => $this->createObject($behavior->getResourceModel() ?? TargetResource::class),
+            ];
+        }
+
+        return $configurations;
     }
 
     private function createObject(string $className, array $params = []): object
