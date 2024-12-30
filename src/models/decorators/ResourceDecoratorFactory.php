@@ -4,17 +4,13 @@ namespace hipanel\modules\finance\models\decorators;
 
 use hiqdev\billing\registry\behavior\ResourceDecoratorBehavior;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorData;
+use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
 use hiqdev\billing\registry\TariffConfiguration;
 use hiqdev\php\billing\product\BehaviorNotFoundException;
 use yii\base\InvalidConfigException;
 
 class ResourceDecoratorFactory
 {
-    /**
-     * @param $resource
-     * @return ResourceDecoratorInterface
-     * @throws InvalidConfigException
-     */
     public static function createFromResource($resource): ResourceDecoratorInterface
     {
         $type = $resource->model_type ?? $resource->type;

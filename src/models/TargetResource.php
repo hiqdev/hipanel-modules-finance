@@ -2,7 +2,7 @@
 
 namespace hipanel\modules\finance\models;
 
-use hipanel\modules\finance\models\decorators\DecoratedInterface;
+use hiqdev\billing\registry\ResourceDecorator\DecoratedInterface;
 
 class TargetResource extends Resource implements DecoratedInterface
 {

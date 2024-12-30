@@ -3,7 +3,7 @@
 namespace hipanel\modules\finance\models;
 
 use hipanel\modules\finance\models\decorators\ResourceDecoratorFactory;
-use hipanel\modules\finance\models\decorators\ResourceDecoratorInterface;
+use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
 
 trait HasDecorator
 {
