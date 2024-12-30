@@ -6,10 +6,10 @@ namespace hipanel\modules\finance\helpers;
 
 use hipanel\helpers\ArrayHelper;
 use hipanel\modules\finance\models\Consumption;
-use hipanel\modules\finance\models\decorators\ResourceDecoratorInterface;
 use hipanel\modules\finance\models\Target;
 use hipanel\modules\finance\models\TargetResource;
 use hiqdev\billing\registry\behavior\ConsumptionConfigurationBehaviour;
+use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
 use hiqdev\php\billing\product\BillingRegistryInterface;
 use yii\db\ActiveRecordInterface;
 use Yii;
