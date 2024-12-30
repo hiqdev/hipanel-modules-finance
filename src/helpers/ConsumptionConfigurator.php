@@ -10,7 +10,7 @@ use hipanel\modules\finance\models\decorators\ResourceDecoratorInterface;
 use hipanel\modules\finance\models\Target;
 use hipanel\modules\finance\models\TargetResource;
 use hiqdev\billing\registry\behavior\ConsumptionConfigurationBehaviour;
-use hiqdev\php\billing\product\BillingRegistry;
+use hiqdev\php\billing\product\BillingRegistryInterface;
 use yii\db\ActiveRecordInterface;
 use Yii;
 
@@ -18,7 +18,7 @@ final class ConsumptionConfigurator
 {
     public array $configurations = [];
 
-    public function __construct(private readonly BillingRegistry $billingRegistry)
+    public function __construct(private readonly BillingRegistryInterface $billingRegistry)
     {
     }
 
