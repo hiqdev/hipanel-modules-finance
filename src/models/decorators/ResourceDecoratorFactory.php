@@ -33,7 +33,8 @@ class ResourceDecoratorFactory
                 $resource->price,
                 $resource->unit,
                 $resource->currency,
-                $resource->partno,
+                $resource->type,
+                $resource->part->partno,
             ));
         } catch (BehaviorNotFoundException) {
             throw new InvalidConfigException('No representative decoration class found for type "' . $type . '"');
