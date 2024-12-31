@@ -2,6 +2,8 @@
 
 namespace hipanel\modules\finance\models\decorators;
 
+use hipanel\modules\finance\models\Resource;
+use hipanel\modules\finance\models\stubs\AbstractResourceStub;
 use hiqdev\billing\registry\behavior\ResourceDecoratorBehavior;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorData;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
@@ -11,6 +13,11 @@ use yii\base\InvalidConfigException;
 
 class ResourceDecoratorFactory
 {
+    /**
+     * @param Resource|AbstractResourceStub $resource
+     * @return ResourceDecoratorInterface
+     * @throws InvalidConfigException
+     */
     public static function createFromResource($resource): ResourceDecoratorInterface
     {
         $type = $resource->model_type ?? $resource->type;
