@@ -138,18 +138,6 @@ return [
     ],
     'container' => [
         'definitions' => [
-            \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => [
-                'class' => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
-                'configurations' => [
-                    'tariff' => [
-                        'label' => ['hipanel:finance', 'Tariff resources'],
-                        'columns' => ['server_traf95_max', 'server_traf95', 'server_traf95_in'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                ]
-            ],
             \hipanel\modules\dashboard\menus\DashboardMenu::class => [
                 'add' => [
                     'finance' => [
