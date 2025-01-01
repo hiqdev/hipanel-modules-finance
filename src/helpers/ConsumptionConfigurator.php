@@ -9,6 +9,7 @@ use hipanel\modules\finance\models\Consumption;
 use hipanel\modules\finance\models\Target;
 use hipanel\modules\finance\models\TargetResource;
 use hiqdev\billing\registry\behavior\ConsumptionConfigurationBehaviour;
+use hiqdev\billing\registry\product\PriceType;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
 use hiqdev\php\billing\product\BillingRegistryInterface;
 use yii\db\ActiveRecordInterface;
@@ -172,6 +173,19 @@ final class ConsumptionConfigurator
                 'resourceModel' => $this->createObject($behavior->getResourceModel() ?? TargetResource::class),
             ];
         }
+
+        // Can't be added to Billing Registry, so left as it is
+        $configurations['tariff'] = [
+            'label' => Yii::t('hipanel:finance', 'Tariff resources'),
+            'columns' => [
+                PriceType::server_traf95_max->name(),
+                //'server_traf95',      // TODO: Didn't find it in the database for tariff. Commented for now because it is causing fatal error
+                //'server_traf95_in',   // TODO: Didn't find it in the database for tariff. Commented for now because it is causing fatal error
+            ],
+            'groups' => [],
+            'model' => $this->createObject(Target::class),
+            'resourceModel' => $this->createObject(TargetResource::class),
+        ];
 
         return $configurations;
     }
