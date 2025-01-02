@@ -7,7 +7,9 @@ use hipanel\modules\finance\models\Consumption;
 use hipanel\modules\finance\models\proxy\Resource;
 use hipanel\modules\server\models\Hub;
 use hipanel\modules\server\models\Server;
+use hiqdev\billing\registry\product\Aggregate;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
+use hiqdev\billing\registry\TariffConfiguration;
 use hiqdev\hiart\ActiveRecord;
 use hiqdev\yii\compat\yii;
 use Yii as BaseYii;
@@ -60,7 +62,8 @@ class ResourceHelper
 
     public static function calculateTotal(array $resources): array
     {
-        $totals = [];
+        $billingRegistry = TariffConfiguration::buildRegistry();
+
         // TODO: overwrite to BillingRegistry
         $totalsOverMax = [
             'cdn_cache',
@@ -77,20 +80,30 @@ class ResourceHelper
             'server_ssd',
             'server_files',
         ];
+        $totals = [];
         foreach (self::filterByAvailableTypes($resources) as $resource) {
             $decorator = $resource->buildResourceModel()->decorator();
-            if (in_array($resource->type, $totalsOverMax, true)) {
-                $totals[$resource->type]['amount'] = max(($totals[$resource->type]['amount'] ?? 0),
-                    self::convertAmount($decorator));
-            } else {
-                $totals[$resource->type]['amount'] = bcadd($totals[$resource->type]['amount'] ?? 0,
-                    self::convertAmount($decorator),
-                    3);
-            }
+            $type = $resource->type;
+            $aggregate = $billingRegistry->getAggregate($type);
+
+            $totals[$type]['amount'] = self::calculateAmount(
+                $aggregate,
+                $totals[$type]['amount'] ?? 0,
+                $decorator,
+            );
             $totals[$resource->type]['unit'] = $decorator->displayUnit();
         }
 
         return $totals;
+    }
+
+    private static function calculateAmount(Aggregate $aggregate, $amount, ResourceDecoratorInterface $decorator)
+    {
+        if ($aggregate->isMax()) {
+            return max($amount, self::convertAmount($decorator));
+        } else {
+            return bcadd($amount, self::convertAmount($decorator), 3);
+        }
     }
 
     public static function filterByAvailableTypes(array $resources): array
