@@ -8,6 +8,7 @@ use hipanel\modules\finance\models\proxy\Resource;
 use hipanel\modules\server\models\Hub;
 use hipanel\modules\server\models\Server;
 use hiqdev\billing\registry\product\Aggregate;
+use hiqdev\billing\registry\product\GType;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
 use hiqdev\billing\registry\TariffConfiguration;
 use hiqdev\hiart\ActiveRecord;
@@ -68,7 +69,7 @@ class ResourceHelper
         foreach (self::filterByAvailableTypes($resources) as $resource) {
             $decorator = $resource->buildResourceModel()->decorator();
             $type = $resource->type;
-            $aggregate = $billingRegistry->getAggregate($type);
+            $aggregate = $billingRegistry->getAggregate(self::addOveruseToTypeIfNeeded($type));
 
             $totals[$type]['amount'] = self::calculateAmount(
                 $aggregate,
@@ -79,6 +80,16 @@ class ResourceHelper
         }
 
         return $totals;
+    }
+
+    public static function addOveruseToTypeIfNeeded(string $type): string
+    {
+        // TODO: I can't add overuse to all types. For example:
+        if (str_starts_with($type, GType::overuse->name()) === false) {
+            return GType::overuse->name() . ',' . $type;
+        }
+
+        return $type;
     }
 
     private static function calculateAmount(Aggregate $aggregate, $amount, ResourceDecoratorInterface $decorator)

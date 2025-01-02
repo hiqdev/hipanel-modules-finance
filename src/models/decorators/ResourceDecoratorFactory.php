@@ -2,9 +2,11 @@
 
 namespace hipanel\modules\finance\models\decorators;
 
+use hipanel\modules\finance\helpers\ResourceHelper;
 use hipanel\modules\finance\models\Resource;
 use hipanel\modules\finance\models\stubs\AbstractResourceStub;
 use hiqdev\billing\registry\behavior\ResourceDecoratorBehavior;
+use hiqdev\billing\registry\product\GType;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorData;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
 use hiqdev\billing\registry\TariffConfiguration;
@@ -26,7 +28,10 @@ class ResourceDecoratorFactory
 
         try {
             /** @var ResourceDecoratorBehavior $behavior */
-            $behavior = $registry->getBehavior($type, ResourceDecoratorBehavior::class);
+            $behavior = $registry->getBehavior(
+                ResourceHelper::addOveruseToTypeIfNeeded($type),
+                ResourceDecoratorBehavior::class,
+            );
 
             return $behavior->createDecorator(new ResourceDecoratorData(
                 $resource->quantity,
