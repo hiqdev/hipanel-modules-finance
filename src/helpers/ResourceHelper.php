@@ -64,22 +64,6 @@ class ResourceHelper
     {
         $billingRegistry = TariffConfiguration::buildRegistry();
 
-        // TODO: overwrite to BillingRegistry
-        $totalsOverMax = [
-            'cdn_cache',
-            'cdn_cache95',
-            'cdn_traf95',
-            'cdn_traf95_max',
-            'server_traf95',
-            'server_traf95_in',
-            'server_traf95_max',
-            'storage_du',
-            'storage_du95',
-            'server_du',
-            'server_sata',
-            'server_ssd',
-            'server_files',
-        ];
         $totals = [];
         foreach (self::filterByAvailableTypes($resources) as $resource) {
             $decorator = $resource->buildResourceModel()->decorator();
