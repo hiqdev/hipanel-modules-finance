@@ -61,6 +61,7 @@ class ResourceHelper
     public static function calculateTotal(array $resources): array
     {
         $totals = [];
+        // TODO: overwrite to BillingRegistry
         $totalsOverMax = [
             'cdn_cache',
             'cdn_cache95',
