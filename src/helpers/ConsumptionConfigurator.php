@@ -2,6 +2,7 @@
 
 namespace hipanel\modules\finance\helpers;
 
+use hipanel\base\Model;
 use hipanel\helpers\ArrayHelper;
 use hipanel\modules\finance\models\Consumption;
 use hipanel\modules\finance\models\Target;
@@ -15,6 +16,7 @@ use Yii;
 
 final class ConsumptionConfigurator
 {
+    /** @var ConsumptionConfiguratorData[]|null */
     private ?array $configurations = null;
 
     private ?array $allPossibleColumnsWithLabels = null;
@@ -25,27 +27,26 @@ final class ConsumptionConfigurator
 
     public function getColumns(string $class): array
     {
-        return $this->getConfigurationByClass($class)['columns'];
+        return $this->getConfigurationByClass($class)->columns;
     }
 
     /**
-     * @param string $class
-     * @return array{label: string, columns: array, group: array, model: ActiveRecordInterface, resourceModel: ActiveRecordInterface}
+     * @param string $class - for example: load_balancer
      */
-    public function getConfigurationByClass(string $class): array
+    public function getConfigurationByClass(string $class): ConsumptionConfiguratorData
     {
-        $fallback = [
-            'label' => ['hipanel:finance', $class],
-            'columns' => [],
-            'groups' => [],
-            'model' => $this->createObject(Target::class),
-            'resourceModel' => $this->createObject(TargetResource::class),
-        ];
+        $fallback = new ConsumptionConfiguratorData(
+            $class,
+            [],
+            [],
+            $this->createObject(Target::class),
+            $this->createObject(TargetResource::class),
+        );
 
         return $this->getConfigurations()[$class] ?? $fallback;
     }
 
-    private function createObject(string $className, array $params = []): object
+    private function createObject(string $className, array $params = []): Model
     {
         return Yii::createObject(array_merge(['class' => $className], $params));
     }
@@ -59,6 +60,9 @@ final class ConsumptionConfigurator
         return $this->configurations;
     }
 
+    /**
+     * @return ConsumptionConfiguratorData[]
+     */
     private function buildConfigurations(): array
     {
         $configurations = [];
@@ -66,27 +70,27 @@ final class ConsumptionConfigurator
         foreach ($this->billingRegistry->getBehaviors(ConsumptionConfigurationBehaviour::class) as $behavior) {
             $tariffType = $behavior->getTariffType();
 
-            $configurations[$tariffType->name()] = [
-                'label' => $behavior->getLabel(),
-                'columns' => $behavior->columns,
-                'groups' => $behavior->groups,
-                'model' => $this->createObject($behavior->getModel() ?? Target::class),
-                'resourceModel' => $this->createObject($behavior->getResourceModel() ?? TargetResource::class),
-            ];
+            $configurations[$tariffType->name()] = new ConsumptionConfiguratorData(
+                $behavior->getLabel(),
+                $behavior->columns,
+                $behavior->groups,
+                $this->createObject($behavior->getModel() ?? Target::class),
+                $this->createObject($behavior->getResourceModel() ?? TargetResource::class),
+            );
         }
 
         // Can't be added to Billing Registry, so left as it is
-        $configurations['tariff'] = [
-            'label' => Yii::t('hipanel:finance', 'Tariff resources'),
-            'columns' => [
+        $configurations['tariff'] = new ConsumptionConfiguratorData(
+            'Tariff resources',
+            [
                 PriceType::server_traf95_max->name(),
                 'server_traf95',
                 'server_traf95_in',
             ],
-            'groups' => [],
-            'model' => $this->createObject(Target::class),
-            'resourceModel' => $this->createObject(TargetResource::class),
-        ];
+            [],
+            $this->createObject(Target::class),
+            $this->createObject(TargetResource::class),
+        );
 
         return $configurations;
     }
@@ -108,7 +112,7 @@ final class ConsumptionConfigurator
     {
         $groups = [];
         $columns = $this->getColumns($class);
-        foreach ($this->getConfigurationByClass($class)['groups'] as $group) {
+        foreach ($this->getConfigurationByClass($class)->groups as $group) {
             $groups[] = $group;
             foreach ($group as $item) {
                 $columns = array_diff($columns, [$item]);
@@ -135,20 +139,23 @@ final class ConsumptionConfigurator
 
     public function getClassesDropDownOptions(): array
     {
-        return array_filter(ArrayHelper::getColumn($this->getConfigurations(), static function (array $config): ?string {
-            if (isset($config['columns']) && !empty($config['columns'])) {
-                return $config['label'];
-            }
+        return array_filter(ArrayHelper::getColumn(
+            $this->getConfigurations(),
+            static function (ConsumptionConfiguratorData $config): ?string {
+                if (!empty($config->columns)) {
+                    return $config->getLabel();
+                }
 
-            return null;
-        }));
+                return null;
+            }
+        ));
     }
 
     public function getAllPossibleColumns(): array
     {
         $columns = [];
         foreach ($this->getConfigurations() as $configuration) {
-            $columns = array_merge($configuration['columns'], $columns);
+            $columns = array_merge($configuration->columns, $columns);
         }
 
         return array_unique($columns);
@@ -159,7 +166,8 @@ final class ConsumptionConfigurator
         if ($this->allPossibleColumnsWithLabels === null) {
             $this->allPossibleColumnsWithLabels = [];
             foreach ($this->getConfigurations() as $class => $configuration) {
-                $columns = $configuration['columns'];
+                $columns = $configuration->columns;
+
                 foreach ($columns as $column) {
                     $decorator = $this->getDecorator($class, $column);
 
@@ -175,34 +183,34 @@ final class ConsumptionConfigurator
     {
         $config = $this->getConfigurationByClass($class);
 
-        $config['resourceModel']->type = $type;
+        $config->resourceModel->type = $type;
 
         /** @var ResourceDecoratorInterface $decorator */
-        $decorator = $config['resourceModel']->decorator();
+        $decorator = $config->resourceModel->decorator();
 
         return $decorator;
     }
 
-    public function buildResourceModel(ActiveRecordInterface $resource)
+    public function buildResourceModel(ActiveRecordInterface $resource): object
     {
         $config = $this->getConfigurationByClass($resource->class);
 
-        $config['resourceModel']->setAttributes([
+        $config->resourceModel->setAttributes([
             'type' => $resource->type,
             'unit' => $resource->unit,
             'quantity' => $resource->getAmount(),
         ]);
 
-        return $config['resourceModel'];
+        return $config->resourceModel;
     }
 
-    public function fillTheOriginalModel(Consumption $consumption)
+    public function fillTheOriginalModel(Consumption $consumption): object
     {
         $configuration = $this->getConfigurationByClass($consumption->class);
 
-        $configuration['model']->setAttributes($consumption->mainObject, false);
+        $configuration->model->setAttributes($consumption->mainObject, false);
 
-        return $configuration['model'];
+        return $configuration->model;
     }
 
     public function getFirstAvailableClass(): string

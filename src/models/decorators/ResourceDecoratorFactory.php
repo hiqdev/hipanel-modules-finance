@@ -33,16 +33,21 @@ class ResourceDecoratorFactory
                 ResourceDecoratorBehavior::class,
             );
 
-            return $behavior->createDecorator(new ResourceDecoratorData(
-                $resource->quantity,
-                $resource->price,
-                $resource->unit,
-                $resource->currency,
-                $resource->type,
-                $resource->part->partno,
-            ));
+            return $behavior->createDecorator(self::createResourceDecoratorData($resource));
         } catch (BehaviorNotFoundException) {
             throw new InvalidConfigException('No representative decoration class found for type "' . $type . '"');
         }
+    }
+
+    private static function createResourceDecoratorData(Resource|AbstractResourceStub $resource): ResourceDecoratorData
+    {
+        return new ResourceDecoratorData(
+            $resource->quantity,
+            $resource->price,
+            $resource->unit,
+            $resource->currency,
+            $resource->type,
+            $resource->part->partno,
+        );
     }
 }
