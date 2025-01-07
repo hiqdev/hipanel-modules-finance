@@ -196,7 +196,7 @@ return [
                 );
             },
             \Money\MoneyParser::class => \Money\Parser\DecimalMoneyParser::class,
-//            \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
+            \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
             \hiqdev\php\billing\product\BillingRegistryInterface::class => static function () {
                 return \hiqdev\billing\registry\TariffConfiguration::buildRegistry();
             },
