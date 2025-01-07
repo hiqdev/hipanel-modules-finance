@@ -1,16 +1,17 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace hipanel\modules\finance\helpers;
 
 use hipanel\helpers\ArrayHelper;
 use hipanel\modules\finance\models\Consumption;
-use hipanel\modules\finance\models\decorators\ResourceDecoratorInterface;
 use hipanel\modules\finance\models\proxy\Resource;
 use hipanel\modules\server\models\Hub;
 use hipanel\modules\server\models\Server;
+use hiqdev\billing\registry\product\Aggregate;
+use hiqdev\billing\registry\product\GType;
+use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
+use hiqdev\billing\registry\TariffConfiguration;
 use hiqdev\hiart\ActiveRecord;
-use hiqdev\php\units\Quantity;
-use hiqdev\php\units\Unit;
 use hiqdev\yii\compat\yii;
 use Yii as BaseYii;
 use yii\db\ActiveRecordInterface;
@@ -19,56 +20,9 @@ use yii\helpers\Json;
 
 class ResourceHelper
 {
-    public static function convertAmount(ResourceDecoratorInterface $decorator)
+    private static function convertAmount(ResourceDecoratorInterface $decorator)
     {
-        $configurator = yii::getContainer()->get(ConsumptionConfigurator::class);
-        $amount = $decorator->getPrepaidQuantity();
-        $targetTypes = $configurator->getAllPossibleColumns();
-        unset(
-            $targetTypes[array_search('referral', $targetTypes, true)],
-            $targetTypes[array_search('ip_num', $targetTypes, true)],
-            $targetTypes[array_search('server_files', $targetTypes, true)],
-            $targetTypes[array_search('power', $targetTypes, true)],
-            $targetTypes[array_search('cloud_ip_regular', $targetTypes, true)],
-            $targetTypes[array_search('cloud_ip_anycast', $targetTypes, true)],
-            $targetTypes[array_search('cloud_ip_public', $targetTypes, true)],
-            $targetTypes[array_search('cloud_ip_regular_max', $targetTypes, true)],
-            $targetTypes[array_search('cloud_ip_anycast_max', $targetTypes, true)],
-            $targetTypes[array_search('cloud_ip_public_max', $targetTypes, true)],
-        );
-        $convertibleTypes = array_merge([
-            'backup_du',
-            'cdn_cache',
-            'cdn_cache95',
-            'cdn_traf',
-            'cdn_traf_plain',
-            'cdn_traf_ssl',
-            'cdn_traf_max',
-            'hdd',
-            'ram',
-            'speed',
-            'server_du',
-            'server_sata',
-            'server_ssd',
-            'server_traf95',
-            'server_traf95_in',
-            'server_traf95_max',
-            'server_traf',
-            'server_traf_in',
-            'server_traf_max',
-            'vps_traf',
-            'vps_traf_in',
-            'vps_traf_max',
-            'storage_du',
-            'storage_du95',
-        ], $targetTypes);
-        if (in_array($decorator->resource->type, $convertibleTypes, true)) {
-            $from = Unit::create($decorator->resource->unit)->getName();
-            $to = Unit::create($decorator->toUnit());
-            $amount = sprintf('%.3F', Quantity::create($from, $amount)->convert($to)->getQuantity());
-        }
-
-        return $amount;
+        return \hiqdev\billing\registry\helper\ResourceHelper::convertAmount($decorator);
     }
 
     public static function prepareDetailView(array $resources): array
@@ -109,36 +63,42 @@ class ResourceHelper
 
     public static function calculateTotal(array $resources): array
     {
+        $billingRegistry = TariffConfiguration::buildRegistry();
+
         $totals = [];
-        $totalsOverMax = [
-            'cdn_cache',
-            'cdn_cache95',
-            'cdn_traf95',
-            'cdn_traf95_max',
-            'server_traf95',
-            'server_traf95_in',
-            'server_traf95_max',
-            'storage_du',
-            'storage_du95',
-            'server_du',
-            'server_sata',
-            'server_ssd',
-            'server_files',
-        ];
         foreach (self::filterByAvailableTypes($resources) as $resource) {
             $decorator = $resource->buildResourceModel()->decorator();
-            if (in_array($resource->type, $totalsOverMax, true)) {
-                $totals[$resource->type]['amount'] = max(($totals[$resource->type]['amount'] ?? 0),
-                    self::convertAmount($decorator));
-            } else {
-                $totals[$resource->type]['amount'] = bcadd($totals[$resource->type]['amount'] ?? 0,
-                    self::convertAmount($decorator),
-                    3);
-            }
+            $type = $resource->type;
+            $aggregate = $billingRegistry->getAggregate(self::addOveruseToTypeIfNeeded($type));
+
+            $totals[$type]['amount'] = self::calculateAmount(
+                $aggregate,
+                $totals[$type]['amount'] ?? 0,
+                $decorator,
+            );
             $totals[$resource->type]['unit'] = $decorator->displayUnit();
         }
 
         return $totals;
+    }
+
+    public static function addOveruseToTypeIfNeeded(string $type): string
+    {
+        // TODO: I can't add overuse to all types. For example:
+        if (str_starts_with($type, GType::overuse->name()) === false) {
+            return GType::overuse->name() . ',' . $type;
+        }
+
+        return $type;
+    }
+
+    private static function calculateAmount(Aggregate $aggregate, $amount, ResourceDecoratorInterface $decorator)
+    {
+        if ($aggregate->isMax()) {
+            return max($amount, self::convertAmount($decorator));
+        } else {
+            return bcadd($amount, self::convertAmount($decorator), 3);
+        }
     }
 
     public static function filterByAvailableTypes(array $resources): array

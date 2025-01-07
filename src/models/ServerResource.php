@@ -11,12 +11,8 @@
 namespace hipanel\modules\finance\models;
 
 use hipanel\base\ModelTrait;
-use hipanel\modules\finance\models\decorators\DecoratedInterface;
-use hipanel\modules\finance\models\decorators\ResourceDecoratorInterface;
-use hipanel\modules\finance\models\decorators\server\AbstractServerResourceDecorator;
-use hipanel\modules\finance\models\decorators\server\ServerResourceDecoratorFactory;
+use hiqdev\billing\registry\ResourceDecorator\DecoratedInterface;
 use Yii;
-use yii\base\InvalidConfigException;
 
 /**
  * Class ServerResource.
@@ -28,6 +24,8 @@ use yii\base\InvalidConfigException;
 class ServerResource extends Resource implements DecoratedInterface
 {
     use ModelTrait;
+
+    use HasDecorator;
 
     public static function tableName()
     {
@@ -114,15 +112,6 @@ class ServerResource extends Resource implements DecoratedInterface
         ];
 
         return isset($types[$this->type]) ? $types[$this->type] : 0.01;
-    }
-
-    public function decorator(): ResourceDecoratorInterface
-    {
-        if (empty($this->decorator)) {
-            $this->decorator = ServerResourceDecoratorFactory::createFromResource($this);
-        }
-
-        return $this->decorator;
     }
 
     public function realObjectId()

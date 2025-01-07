@@ -6,6 +6,7 @@ use hipanel\base\Model;
 use hipanel\base\ModelTrait;
 use hipanel\behaviors\TaggableBehavior;
 use hipanel\models\TaggableInterface;
+use hipanel\modules\finance\helpers\ConsumptionConfiguratorData;
 use hipanel\modules\finance\helpers\ConsumptionConfigurator;
 use hipanel\modules\finance\models\query\TargetQuery;
 use Yii;
@@ -41,13 +42,15 @@ class Target extends Model implements TaggableInterface
     public function getTypes(): array
     {
         $configurator = Yii::$container->get(ConsumptionConfigurator::class);
+
         $configurations = array_filter(
             $configurator->getConfigurations(),
-            static fn(array $configuration): bool => $configuration['model'] instanceof self
+            static fn(ConsumptionConfiguratorData $configuration): bool => $configuration->model instanceof self
         );
+
         $types = [];
         foreach ($configurations as $type => $configuration) {
-            $types[$type] = $configuration['label'];
+            $types[$type] = $configuration->getLabel();
         }
 
         return $types;

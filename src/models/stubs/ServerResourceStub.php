@@ -10,22 +10,11 @@
 
 namespace hipanel\modules\finance\models\stubs;
 
-use hipanel\modules\finance\models\decorators\server\AbstractServerResourceDecorator;
-use hipanel\modules\finance\models\decorators\server\ServerResourceDecoratorFactory;
+use hipanel\modules\finance\models\HasDecorator;
 
 class ServerResourceStub extends AbstractResourceStub
 {
-    /**
-     * @return AbstractServerResourceDecorator
-     */
-    public function decorator()
-    {
-        if (empty($this->decorator)) {
-            $this->decorator = ServerResourceDecoratorFactory::createFromResource($this);
-        }
-
-        return $this->decorator;
-    }
+    use HasDecorator;
 
     public function __get($value)
     {

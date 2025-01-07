@@ -50,7 +50,8 @@
         "hiqdev/hipanel-module-client": "dev-master",
         "tuck/sort": "^0.1.0",
         "moneyphp/money": "*",
-        "hiqdev/php-units": "*"
+        "hiqdev/php-units": "*",
+        "advancedhosters/billing-registry": "dev-master"
     },
     "require-dev": {
         "hiqdev/hidev-php": "dev-master",

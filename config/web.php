@@ -138,99 +138,6 @@ return [
     ],
     'container' => [
         'definitions' => [
-            \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => [
-                'class' => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
-                'configurations' => [
-                    'anycastcdn' => [
-                        'label' => ['hipanel:finance', 'Anycast CDN'],
-                        'columns' => [
-                            'cdn_traf_plain',
-                            'cdn_traf_ssl',
-                            'cdn_traf',
-                            'cdn_traf_max',
-                            'cdn_traf95',
-                            'cdn_traf95_max',
-                            'cdn_cache',
-                            'cdn_cache95',
-                        ],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'videocdn' => [
-                        'label' => ['hipanel:finance', 'VideoCDN'],
-                        'columns' => [
-                            'server_traf',
-                            'server_traf_in',
-                            'server_traf95',
-                            'server_traf95_in',
-                            'server_du',
-                            'server_files',
-                            'server_ssd',
-                            'server_sata',
-                        ],
-                        'groups' => [['server_traf', 'server_traf_in'], ['server_traf95', 'server_traf95_in']],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'vps' => [
-                        'label' => ['hipanel:finance', 'VPS'],
-                        'columns' => ['vps_traf', 'vps_traf_in', 'vps_traf_max', 'cloud_ip_anycast', 'cloud_ip_public'],
-                        'groups' => [['vps_traf', 'vps_traf_in', 'cloud_ip_anycast', 'cloud_ip_public']],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'snapshot' => [
-                        'label' => ['hipanel:finance', 'Snapshot'],
-                        'columns' => ['snapshot_du'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'volume' => [
-                        'label' => ['hipanel:finance', 'Volume'],
-                        'columns' => ['volume_du'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'storage' => [
-                        'label' => ['hipanel:finance', 'Storage'],
-                        'columns' => ['storage_du', 'storage_du95'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'private_cloud' => [
-                        'label' => ['hipanel:finance', 'Private cloud'],
-                        'columns' => [],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'private_cloud_backup' => [
-                        'label' => ['hipanel:finance', 'Private cloud backup'],
-                        'columns' => ['private_cloud_backup_du'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'load_balancer' => [
-                        'label' => ['hipanel:finance', 'Load balancer'],
-                        'columns' => ['lb_capacity_unit', 'lb_ha_capacity_unit'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                    'tariff' => [
-                        'label' => ['hipanel:finance', 'Tariff resources'],
-                        'columns' => ['server_traf95_max', 'server_traf95', 'server_traf95_in'],
-                        'groups' => [],
-                        'model' => Target::class,
-                        'resourceModel' => TargetResource::class,
-                    ],
-                ]
-            ],
             \hipanel\modules\dashboard\menus\DashboardMenu::class => [
                 'add' => [
                     'finance' => [
@@ -289,7 +196,10 @@ return [
                 );
             },
             \Money\MoneyParser::class => \Money\Parser\DecimalMoneyParser::class,
-//            \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
+            \hipanel\modules\finance\helpers\ConsumptionConfigurator::class => \hipanel\modules\finance\helpers\ConsumptionConfigurator::class,
+            \hiqdev\php\billing\product\BillingRegistryInterface::class => static function () {
+                return \hiqdev\billing\registry\TariffConfiguration::buildRegistry();
+            },
         ],
     ],
 ];

@@ -10,12 +10,11 @@
 
 namespace hipanel\modules\finance\models\stubs;
 
-use hipanel\modules\finance\models\decorators\AbstractResourceDecorator;
 use hipanel\modules\finance\models\Tariff;
-use yii\base\InvalidConfigException;
+use hiqdev\billing\registry\ResourceDecorator\DecoratedInterface;
 use yii\base\Model;
 
-abstract class AbstractResourceStub extends Model
+abstract class AbstractResourceStub extends Model implements DecoratedInterface
 {
     /**
      * @var Tariff
@@ -26,18 +25,4 @@ abstract class AbstractResourceStub extends Model
      * @var string
      */
     public $type;
-
-    /**
-     * @var AbstractResourceDecorator
-     */
-    protected $decorator;
-
-    /**
-     * @throws InvalidConfigException
-     * @return AbstractResourceDecorator
-     */
-    public function decorator()
-    {
-        throw new InvalidConfigException('Method "decorator" is not available for class Resource');
-    }
 }
