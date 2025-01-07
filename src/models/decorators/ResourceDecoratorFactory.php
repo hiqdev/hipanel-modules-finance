@@ -6,11 +6,11 @@ use hipanel\modules\finance\helpers\ResourceHelper;
 use hipanel\modules\finance\models\Resource;
 use hipanel\modules\finance\models\stubs\AbstractResourceStub;
 use hiqdev\billing\registry\behavior\ResourceDecoratorBehavior;
-use hiqdev\billing\registry\product\GType;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorData;
 use hiqdev\billing\registry\ResourceDecorator\ResourceDecoratorInterface;
-use hiqdev\billing\registry\TariffConfiguration;
 use hiqdev\php\billing\product\BehaviorNotFoundException;
+use hiqdev\php\billing\product\BillingRegistryInterface;
+use Yii;
 use yii\base\InvalidConfigException;
 
 class ResourceDecoratorFactory
@@ -24,7 +24,7 @@ class ResourceDecoratorFactory
     {
         $type = $resource->model_type ?? $resource->type;
 
-        $registry = TariffConfiguration::buildRegistry();
+        $registry = Yii::createObject(BillingRegistryInterface::class);
 
         try {
             /** @var ResourceDecoratorBehavior $behavior */
