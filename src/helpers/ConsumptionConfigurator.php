@@ -19,7 +19,7 @@ final class ConsumptionConfigurator
     /** @var ConsumptionConfiguratorData[]|null */
     private ?array $configurations = null;
 
-    private ?array $allPossibleColumnsWithLabels = null;
+    private ?array $columnsWithLabelsGroupedByClass = null;
 
     public function __construct(private readonly BillingRegistryInterface $billingRegistry)
     {
@@ -125,16 +125,41 @@ final class ConsumptionConfigurator
         return $groups;
     }
 
-    public function getColumnsWithLabels(string $class): array
+    public function getColumnsWithLabels(string $searchClass): array
     {
         $result = [];
-        foreach ($this->getColumns($class) as $column) {
-            $decorator = $this->getDecorator($class, $column);
-
-            $result[$column] = $decorator->displayTitle();
+        foreach ($this->getCachedColumnsWithLabelsGroupedByClass() as $class => $columns) {
+            if ($class === $searchClass) {
+                foreach ($columns as $column => $label) {
+                    $result[$column] = $label;
+                }
+            }
         }
 
         return $result;
+    }
+
+    /**
+     * Please use this method to avoid call heavy getDecorator() method only for retrieve title
+     *
+     * @return array
+     */
+    private function getCachedColumnsWithLabelsGroupedByClass(): array
+    {
+        if ($this->columnsWithLabelsGroupedByClass === null) {
+            foreach ($this->getConfigurations() as $class => $configuration) {
+                $columns = $configuration->columns;
+
+                $this->columnsWithLabelsGroupedByClass[$class] = [];
+                foreach ($columns as $column) {
+                    $decorator = $this->getDecorator($class, $column);
+
+                    $this->columnsWithLabelsGroupedByClass[$class][$column] = $decorator->displayTitle();
+                }
+            }
+        }
+
+        return $this->columnsWithLabelsGroupedByClass;
     }
 
     public function getClassesDropDownOptions(): array
@@ -163,20 +188,14 @@ final class ConsumptionConfigurator
 
     public function getAllPossibleColumnsWithLabels(): array
     {
-        if ($this->allPossibleColumnsWithLabels === null) {
-            $this->allPossibleColumnsWithLabels = [];
-            foreach ($this->getConfigurations() as $class => $configuration) {
-                $columns = $configuration->columns;
-
-                foreach ($columns as $column) {
-                    $decorator = $this->getDecorator($class, $column);
-
-                    $this->allPossibleColumnsWithLabels[$column] = $decorator->displayTitle();
-                }
+        $allPossibleColumnsWithLabels = [];
+        foreach ($this->getCachedColumnsWithLabelsGroupedByClass() as $class => $columns) {
+            foreach ($columns as $column => $label) {
+                $allPossibleColumnsWithLabels[$column] = $label;
             }
         }
 
-        return $this->allPossibleColumnsWithLabels;
+        return $allPossibleColumnsWithLabels;
     }
 
     private function getDecorator(string $class, string $type): ResourceDecoratorInterface
