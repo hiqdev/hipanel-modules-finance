@@ -179,8 +179,8 @@ final class ConsumptionConfigurator
             'label' => Yii::t('hipanel:finance', 'Tariff resources'),
             'columns' => [
                 PriceType::server_traf95_max->name(),
-                //'server_traf95',      // TODO: Didn't find it in the database for tariff. Commented for now because it is causing fatal error
-                //'server_traf95_in',   // TODO: Didn't find it in the database for tariff. Commented for now because it is causing fatal error
+                'server_traf95',
+                'server_traf95_in',
             ],
             'groups' => [],
             'model' => $this->createObject(Target::class),
