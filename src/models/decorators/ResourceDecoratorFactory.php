@@ -20,7 +20,7 @@ class ResourceDecoratorFactory
      * @return ResourceDecoratorInterface
      * @throws InvalidConfigException
      */
-    public static function createFromResource($resource): ResourceDecoratorInterface
+    public static function createFromResource(Resource|AbstractResourceStub $resource): ResourceDecoratorInterface
     {
         $type = $resource->model_type ?? $resource->type;
 
