@@ -182,7 +182,7 @@ class HistorySalesGridView extends BoxedGridView
             }
 
             $result .= Html::tag('ul', $html, [
-                'class' => 'tariff-chain ' . ($this->user->can('support') ?: 'inactiveLink'),
+                'class' => 'tariff-chain ' . ($this->user->can('sale.read') ?: 'inactiveLink'),
                 'style' => 'margin: 0; padding: 0;',
             ]);
 
@@ -190,7 +190,7 @@ class HistorySalesGridView extends BoxedGridView
                 Html::a($sale['start'] . ' - ' . $sale['finish'], ['@sale/view', 'id' => $sale['id']])
             );
             $result .= Html::tag('ul', $html, [
-                'class' => 'tariff-chain ' . ($this->user->can('support') ?: 'inactiveLink'),
+                'class' => 'tariff-chain ' . ($this->user->can('sale.read') ?: 'inactiveLink'),
                 'style' => 'margin: 0; padding: 0;',
             ]);
 

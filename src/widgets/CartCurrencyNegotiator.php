@@ -56,7 +56,7 @@ final class CartCurrencyNegotiator extends Widget
             $cartCurrency
         );
 
-        if (!Yii::$app->user->can('support')) {
+        if (Yii::$app->user->can('resell') || !Yii::$app->user->isAccountOwner()) {
             // Prevent seller from exchanging own money to pay for client's services,
             // when client's tariff is in different currency.
             $convertibleCurrencies = $this->convertibleCurrencies(
@@ -176,7 +176,7 @@ final class CartCurrencyNegotiator extends Widget
             'currency' => $currency,
         ];
 
-        if (round($purse->getBudget(), 2) >= round($amount, 2) || Yii::$app->user->can('manage')) {
+        if (round($purse->getBudget(), 2) >= round($amount, 2) || Yii::$app->user->can('sale.create')) {
             echo $this->render('enough', $options);
         } elseif ($purse->getBudget() > 0) {
             echo $this->render('partial', array_merge($options, [
